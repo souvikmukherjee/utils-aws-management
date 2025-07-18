@@ -8,8 +8,8 @@ export default function SignIn() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState("demo@example.com");
-  const [password, setPassword] = useState("demo123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     // Check if user is already signed in
@@ -77,7 +77,7 @@ export default function SignIn() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="demo@example.com"
+                placeholder="Enter your email"
               />
             </div>
             
@@ -94,16 +94,15 @@ export default function SignIn() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="demo123"
+                placeholder="Enter your password"
               />
             </div>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
             <p className="text-sm text-blue-800">
-              <strong>Demo Credentials:</strong><br />
-              Email: demo@example.com<br />
-              Password: demo123
+              <strong>Development Mode:</strong><br />
+              Use your AWS Cognito credentials or contact your administrator for demo access.
             </p>
           </div>
 

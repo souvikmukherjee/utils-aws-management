@@ -4,60 +4,45 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 const handler = NextAuth({
   providers: [
-    // Mock credentials provider for testing
+    CognitoProvider({
+      clientId: process.env.COGNITO_CLIENT_ID!,
+      clientSecret: process.env.COGNITO_CLIENT_SECRET!,
+      issuer: process.env.COGNITO_ISSUER,
+    }),
     CredentialsProvider({
-      id: "credentials",
-      name: "Demo Login",
+      name: "Demo",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // Mock authentication for demo purposes
-        if (credentials?.email === "demo@example.com" && credentials?.password === "demo123") {
+        // Demo user for development
+        if (credentials?.email === process.env.DEMO_USER_EMAIL && credentials?.password === process.env.DEMO_USER_PASSWORD) {
           return {
-            id: "demo-user-123",
-            email: "demo@example.com",
+            id: "1",
             name: "Demo User",
+            email: process.env.DEMO_USER_EMAIL,
+          };
+        }
+        // Test user for AWS Cognito testing
+        if (credentials?.email === process.env.TEST_USER_EMAIL && credentials?.password === process.env.TEST_USER_PASSWORD) {
+          return {
+            id: "2",
+            name: "Test User",
+            email: process.env.TEST_USER_EMAIL,
           };
         }
         return null;
       }
-    }),
-    // AWS Cognito provider (commented out until configured)
-    // CognitoProvider({
-    //   clientId: process.env.COGNITO_CLIENT_ID!,
-    //   clientSecret: process.env.COGNITO_CLIENT_SECRET!,
-    //   issuer: process.env.COGNITO_ISSUER!,
-    // }),
+    })
   ],
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  callbacks: {
-    async jwt({ token, user, account }) {
-      // Persist the OAuth access_token and or the user id to the token right after signin
-      if (account && user) {
-        token.accessToken = account.access_token;
-        token.refreshToken = account.refresh_token;
-        token.idToken = account.id_token;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      // Send properties to the client, like an access_token and user id from a provider.
-      session.accessToken = token.accessToken;
-      session.user.id = token.sub!;
-      return session;
-    },
   },
   pages: {
     signIn: "/auth/signin",
-    signOut: "/auth/signout",
-    error: "/auth/error",
   },
   debug: process.env.NODE_ENV === "development",
 });
 
-export { handler as GET, handler as POST }; 
+export { handler as GET, handler as POST };
