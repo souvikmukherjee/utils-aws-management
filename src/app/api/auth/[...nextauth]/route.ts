@@ -1,13 +1,35 @@
 import NextAuth from "next-auth";
 import CognitoProvider from "next-auth/providers/cognito";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 const handler = NextAuth({
   providers: [
-    CognitoProvider({
-      clientId: process.env.COGNITO_CLIENT_ID!,
-      clientSecret: process.env.COGNITO_CLIENT_SECRET!,
-      issuer: process.env.COGNITO_ISSUER!,
+    // Mock credentials provider for testing
+    CredentialsProvider({
+      id: "credentials",
+      name: "Demo Login",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        // Mock authentication for demo purposes
+        if (credentials?.email === "demo@example.com" && credentials?.password === "demo123") {
+          return {
+            id: "demo-user-123",
+            email: "demo@example.com",
+            name: "Demo User",
+          };
+        }
+        return null;
+      }
     }),
+    // AWS Cognito provider (commented out until configured)
+    // CognitoProvider({
+    //   clientId: process.env.COGNITO_CLIENT_ID!,
+    //   clientSecret: process.env.COGNITO_CLIENT_SECRET!,
+    //   issuer: process.env.COGNITO_ISSUER!,
+    // }),
   ],
   session: {
     strategy: "jwt",
