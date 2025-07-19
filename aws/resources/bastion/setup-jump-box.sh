@@ -107,19 +107,41 @@ print_success "SSH access rule added for IP: ${CURRENT_IP}/32"
 
 # Add rule for database access from jump box
 print_status "Adding database access rules..."
-aws ec2 authorize-security-group-ingress \
-    --group-id "$SECURITY_GROUP_ID" \
-    --protocol tcp \
-    --port 5432 \
-    --source-group "$SECURITY_GROUP_ID" \
-    > /dev/null
 
-aws ec2 authorize-security-group-ingress \
-    --group-id "$SECURITY_GROUP_ID" \
-    --protocol tcp \
-    --port 6379 \
-    --source-group "$SECURITY_GROUP_ID" \
-    > /dev/null
+# Function to add security group rule with error handling
+add_security_group_rule() {
+    local group_id="$1"
+    local protocol="$2"
+    local port="$3"
+    local source_group="$4"
+    
+    # Try to add the rule, but handle duplicate errors gracefully
+    if aws ec2 authorize-security-group-ingress \
+        --group-id "$group_id" \
+        --protocol "$protocol" \
+        --port "$port" \
+        --source-group "$source_group" \
+        > /dev/null 2>&1; then
+        print_success "Added security group rule successfully (port $port)"
+    else
+        # Check if it's a duplicate error
+        if aws ec2 describe-security-groups \
+            --group-ids "$group_id" \
+            --query "SecurityGroups[0].IpPermissions[?FromPort==$port && ToPort==$port && IpProtocol=='$protocol' && length(UserIdGroupPairs[?GroupId=='$source_group']) > 0]" \
+            --output text | grep -q .; then
+            print_warning "Security group rule already exists (port $port)"
+        else
+            print_error "Failed to add security group rule (port $port)"
+            return 1
+        fi
+    fi
+}
+
+# Add PostgreSQL access rule
+add_security_group_rule "$SECURITY_GROUP_ID" "tcp" "5432" "$SECURITY_GROUP_ID"
+
+# Add Redis access rule
+add_security_group_rule "$SECURITY_GROUP_ID" "tcp" "6379" "$SECURITY_GROUP_ID"
 
 print_success "Database access rules added"
 

@@ -173,20 +173,40 @@ create_security_groups() {
         --query 'GroupId' --output text)
     
     # Allow PostgreSQL access from anywhere (for development)
-    aws ec2 authorize-security-group-ingress \
-        --group-id "$RDS_SECURITY_GROUP_ID" \
-        --protocol tcp \
-        --port 5432 \
-        --cidr 0.0.0.0/0 \
-        > /dev/null
+    # Function to add security group rule with error handling
+    add_security_group_rule() {
+        local group_id="$1"
+        local protocol="$2"
+        local port="$3"
+        local cidr="$4"
+        
+        # Try to add the rule, but handle duplicate errors gracefully
+        if aws ec2 authorize-security-group-ingress \
+            --group-id "$group_id" \
+            --protocol "$protocol" \
+            --port "$port" \
+            --cidr "$cidr" \
+            > /dev/null 2>&1; then
+            print_success "Added security group rule successfully (port $port)"
+        else
+            # Check if it's a duplicate error by checking existing rules
+            if aws ec2 describe-security-groups \
+                --group-ids "$group_id" \
+                --query "SecurityGroups[0].IpPermissions[?FromPort==$port && ToPort==$port && IpProtocol=='$protocol' && length(IpRanges[?CidrIp=='$cidr']) > 0]" \
+                --output text | grep -q .; then
+                print_warning "Security group rule already exists (port $port, CIDR $cidr)"
+            else
+                print_error "Failed to add security group rule (port $port, CIDR $cidr)"
+                return 1
+            fi
+        fi
+    }
     
-    # Allow Redis access from anywhere (for development)
-    aws ec2 authorize-security-group-ingress \
-        --group-id "$REDIS_SECURITY_GROUP_ID" \
-        --protocol tcp \
-        --port 6379 \
-        --cidr 0.0.0.0/0 \
-        > /dev/null
+    # Add PostgreSQL access rule
+    add_security_group_rule "$RDS_SECURITY_GROUP_ID" "tcp" "5432" "0.0.0.0/0"
+    
+    # Add Redis access rule
+    add_security_group_rule "$REDIS_SECURITY_GROUP_ID" "tcp" "6379" "0.0.0.0/0"
     
     print_success "Created security groups"
     print_status "RDS Security Group: $RDS_SECURITY_GROUP_ID"

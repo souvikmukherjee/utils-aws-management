@@ -48,14 +48,38 @@ print_success "Redis Security Group: $REDIS_SECURITY_GROUP"
 
 # Add jump box security group to Redis security group
 print_status "Adding jump box security group to Redis security group..."
-aws ec2 authorize-security-group-ingress \
-    --group-id "$REDIS_SECURITY_GROUP" \
-    --protocol tcp \
-    --port 6379 \
-    --source-group "$JUMP_BOX_SECURITY_GROUP" \
-    > /dev/null
 
-print_success "Added jump box security group to Redis security group"
+# Function to add security group rule with error handling
+add_security_group_rule() {
+    local group_id="$1"
+    local protocol="$2"
+    local port="$3"
+    local source_group="$4"
+    
+    # Try to add the rule, but handle duplicate errors gracefully
+    if aws ec2 authorize-security-group-ingress \
+        --group-id "$group_id" \
+        --protocol "$protocol" \
+        --port "$port" \
+        --source-group "$source_group" \
+        > /dev/null 2>&1; then
+        print_success "Added security group rule successfully"
+    else
+        # Check if it's a duplicate error
+        if aws ec2 describe-security-groups \
+            --group-ids "$group_id" \
+            --query "SecurityGroups[0].IpPermissions[?FromPort==$port && ToPort==$port && IpProtocol=='$protocol' && length(UserIdGroupPairs[?GroupId=='$source_group']) > 0]" \
+            --output text | grep -q .; then
+            print_warning "Security group rule already exists (peer: $source_group, TCP, from port: $port, to port: $port, ALLOW)"
+        else
+            print_error "Failed to add security group rule"
+            return 1
+        fi
+    fi
+}
+
+# Add the Redis access rule
+add_security_group_rule "$REDIS_SECURITY_GROUP" "tcp" "6379" "$JUMP_BOX_SECURITY_GROUP"
 
 # Test Redis connection from jump box
 print_status "Testing Redis connection from jump box..."
