@@ -29,19 +29,36 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Check if running in test mode
+if [ "$INFRASTRUCTURE_TEST_MODE" = "true" ]; then
+    RESOURCE_SUFFIX="${TEST_SUFFIX:-_test}"
+    print_status "Running jump box setup in TEST MODE with suffix: $RESOURCE_SUFFIX"
+else
+    RESOURCE_SUFFIX=""
+    print_status "Running jump box setup in PRODUCTION MODE"
+fi
+
 # Configuration
 PROJECT_NAME="aws-management"
 ENVIRONMENT="dev"
 TIMESTAMP=$(date +%s)
-JUMP_BOX_NAME="${PROJECT_NAME}-${ENVIRONMENT}-jump-box-${TIMESTAMP}"
-KEY_PAIR_NAME="${PROJECT_NAME}-${ENVIRONMENT}-key-${TIMESTAMP}"
-SECURITY_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-jump-sg-${TIMESTAMP}"
+JUMP_BOX_NAME="${PROJECT_NAME}-${ENVIRONMENT}-jump-box-${TIMESTAMP}${RESOURCE_SUFFIX}"
+KEY_PAIR_NAME="${PROJECT_NAME}-${ENVIRONMENT}-key-${TIMESTAMP}${RESOURCE_SUFFIX}"
+SECURITY_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-jump-sg-${TIMESTAMP}${RESOURCE_SUFFIX}"
 
 # Get existing VPC and subnet information
 print_status "Getting existing VPC and subnet information..."
 
-# Get VPC ID from RDS instance
-DB_INSTANCE_IDENTIFIER="aws-management-dev-db-1752944212"
+# Get VPC ID from RDS instance (find the most recent one with our pattern)
+DB_INSTANCE_IDENTIFIER=$(aws rds describe-db-instances --query "DBInstances[?contains(DBInstanceIdentifier, 'aws-management-dev-db') && contains(DBInstanceIdentifier, '$RESOURCE_SUFFIX')].DBInstanceIdentifier" --output text | tr '\t' '\n' | head -1)
+
+if [ -z "$DB_INSTANCE_IDENTIFIER" ]; then
+    print_error "No RDS instance found with pattern 'aws-management-dev-db*$RESOURCE_SUFFIX'"
+    exit 1
+fi
+
+print_status "Using RDS instance: $DB_INSTANCE_IDENTIFIER"
+
 VPC_ID=$(aws rds describe-db-instances --db-instance-identifier "$DB_INSTANCE_IDENTIFIER" --query 'DBInstances[0].DBSubnetGroup.VpcId' --output text)
 SUBNET_GROUP_NAME=$(aws rds describe-db-instances --db-instance-identifier "$DB_INSTANCE_IDENTIFIER" --query 'DBInstances[0].DBSubnetGroup.DBSubnetGroupName' --output text)
 

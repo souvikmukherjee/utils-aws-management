@@ -69,33 +69,49 @@ get_user_input() {
     print_status "AWS Cognito Setup Configuration"
     echo "====================================="
     
-    # Get project name
-    read -p "Enter project name (default: aws-management-utilities): " PROJECT_NAME
-    PROJECT_NAME=${PROJECT_NAME:-aws-management-utilities}
+    # Check if running in test mode
+    if [ "$INFRASTRUCTURE_TEST_MODE" = "true" ]; then
+        RESOURCE_SUFFIX="${TEST_SUFFIX:-_test}"
+        print_status "Running Cognito setup in TEST MODE with suffix: $RESOURCE_SUFFIX"
+        # Use default values for test mode
+        PROJECT_NAME="aws-management-utilities"
+        USER_POOL_NAME="${PROJECT_NAME}-user-pool${RESOURCE_SUFFIX}"
+        APP_CLIENT_NAME="${PROJECT_NAME}-web-app${RESOURCE_SUFFIX}"
+        DOMAIN_PREFIX="${PROJECT_NAME}-auth${RESOURCE_SUFFIX}"
+        CALLBACK_URL="http://localhost:3001/api/auth/callback/cognito"
+        SIGNOUT_URL="http://localhost:3001/auth/signin"
+        ALLOWED_ORIGINS="http://localhost:3001"
+        print_success "Using test configuration"
+    else
+        RESOURCE_SUFFIX=""
+        # Get project name
+        read -p "Enter project name (default: aws-management-utilities): " PROJECT_NAME
+        PROJECT_NAME=${PROJECT_NAME:-aws-management-utilities}
     
-    # Get user pool name
-    read -p "Enter Cognito User Pool name (default: ${PROJECT_NAME}-user-pool): " USER_POOL_NAME
-    USER_POOL_NAME=${USER_POOL_NAME:-${PROJECT_NAME}-user-pool}
-    
-    # Get app client name
-    read -p "Enter App Client name (default: ${PROJECT_NAME}-web-app): " APP_CLIENT_NAME
-    APP_CLIENT_NAME=${APP_CLIENT_NAME:-${PROJECT_NAME}-web-app}
-    
-    # Get domain name
-    read -p "Enter Cognito domain prefix (default: ${PROJECT_NAME}-auth): " DOMAIN_PREFIX
-    DOMAIN_PREFIX=${DOMAIN_PREFIX:-${PROJECT_NAME}-auth}
-    
-    # Get callback URL
-    read -p "Enter callback URL (default: http://localhost:3001/api/auth/callback/cognito): " CALLBACK_URL
-    CALLBACK_URL=${CALLBACK_URL:-http://localhost:3001/api/auth/callback/cognito}
-    
-    # Get sign-out URL
-    read -p "Enter sign-out URL (default: http://localhost:3001/auth/signin): " SIGNOUT_URL
-    SIGNOUT_URL=${SIGNOUT_URL:-http://localhost:3001/auth/signin}
-    
-    # Get allowed origins
-    read -p "Enter allowed origins (default: http://localhost:3001): " ALLOWED_ORIGINS
-    ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3001}
+        # Get user pool name
+        read -p "Enter Cognito User Pool name (default: ${PROJECT_NAME}-user-pool): " USER_POOL_NAME
+        USER_POOL_NAME=${USER_POOL_NAME:-${PROJECT_NAME}-user-pool}
+        
+        # Get app client name
+        read -p "Enter App Client name (default: ${PROJECT_NAME}-web-app): " APP_CLIENT_NAME
+        APP_CLIENT_NAME=${APP_CLIENT_NAME:-${PROJECT_NAME}-web-app}
+        
+        # Get domain name
+        read -p "Enter Cognito domain prefix (default: ${PROJECT_NAME}-auth): " DOMAIN_PREFIX
+        DOMAIN_PREFIX=${DOMAIN_PREFIX:-${PROJECT_NAME}-auth}
+        
+        # Get callback URL
+        read -p "Enter callback URL (default: http://localhost:3001/api/auth/callback/cognito): " CALLBACK_URL
+        CALLBACK_URL=${CALLBACK_URL:-http://localhost:3001/api/auth/callback/cognito}
+        
+        # Get sign-out URL
+        read -p "Enter sign-out URL (default: http://localhost:3001/auth/signin): " SIGNOUT_URL
+        SIGNOUT_URL=${SIGNOUT_URL:-http://localhost:3001/auth/signin}
+        
+        # Get allowed origins
+        read -p "Enter allowed origins (default: http://localhost:3001): " ALLOWED_ORIGINS
+        ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3001}
+    fi
     
     echo
     print_status "Configuration Summary:"
@@ -108,10 +124,13 @@ get_user_input() {
     echo "Allowed Origins: $ALLOWED_ORIGINS"
     echo
     
-    read -p "Proceed with this configuration? (y/N): " CONFIRM
-    if [[ ! $CONFIRM =~ ^[Yy]$ ]]; then
-        print_status "Setup cancelled"
-        exit 0
+    # Skip confirmation in test mode
+    if [ "$INFRASTRUCTURE_TEST_MODE" != "true" ]; then
+        read -p "Proceed with this configuration? (y/N): " CONFIRM
+        if [[ ! $CONFIRM =~ ^[Yy]$ ]]; then
+            print_status "Setup cancelled"
+            exit 0
+        fi
     fi
 }
 

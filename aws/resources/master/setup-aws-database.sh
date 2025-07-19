@@ -67,13 +67,46 @@ validate_aws_credentials() {
 get_user_input() {
     print_status "Please provide the following information:"
     
-    # Get project name
-    read -p "Project name (default: aws-management): " PROJECT_NAME
-    PROJECT_NAME=${PROJECT_NAME:-aws-management}
-    
-    # Get environment
-    read -p "Environment (dev/staging/prod, default: dev): " ENVIRONMENT
-    ENVIRONMENT=${ENVIRONMENT:-dev}
+    # Check if running in test mode
+    if [ "$INFRASTRUCTURE_TEST_MODE" = "true" ]; then
+        RESOURCE_SUFFIX="${TEST_SUFFIX:-_test}"
+        print_status "Running in TEST MODE with suffix: $RESOURCE_SUFFIX"
+        # Use default values for test mode
+        PROJECT_NAME="aws-management"
+        ENVIRONMENT="dev"
+        DB_INSTANCE_TYPE="db.t3.micro"
+        REDIS_NODE_TYPE="cache.t3.micro"
+        DB_PASSWORD="test_password_123"
+        print_success "Using test configuration"
+    else
+        RESOURCE_SUFFIX=""
+        # Get project name
+        read -p "Project name (default: aws-management): " PROJECT_NAME
+        PROJECT_NAME=${PROJECT_NAME:-aws-management}
+        
+        # Get environment
+        read -p "Environment (dev/staging/prod, default: dev): " ENVIRONMENT
+        ENVIRONMENT=${ENVIRONMENT:-dev}
+        
+        # Get database instance type
+        read -p "RDS instance type (default: db.t3.micro): " DB_INSTANCE_TYPE
+        DB_INSTANCE_TYPE=${DB_INSTANCE_TYPE:-db.t3.micro}
+        
+        # Get Redis node type
+        read -p "Redis node type (default: cache.t3.micro): " REDIS_NODE_TYPE
+        REDIS_NODE_TYPE=${REDIS_NODE_TYPE:-cache.t3.micro}
+        
+        # Get database password
+        read -s -p "Database master password: " DB_PASSWORD
+        echo
+        read -s -p "Confirm database master password: " DB_PASSWORD_CONFIRM
+        echo
+        
+        if [ "$DB_PASSWORD" != "$DB_PASSWORD_CONFIRM" ]; then
+            print_error "Passwords do not match"
+            exit 1
+        fi
+    fi
     
     # Get database instance type
     read -p "RDS instance type (default: db.t3.micro): " DB_INSTANCE_TYPE
@@ -96,10 +129,10 @@ get_user_input() {
     
     # Generate unique identifiers
     TIMESTAMP=$(date +%s)
-    STACK_NAME="${PROJECT_NAME}-${ENVIRONMENT}-${TIMESTAMP}"
-    DB_INSTANCE_IDENTIFIER="${PROJECT_NAME}-${ENVIRONMENT}-db-${TIMESTAMP}"
-    REDIS_CLUSTER_ID="${PROJECT_NAME}-${ENVIRONMENT}-redis-${TIMESTAMP}"
-    SECURITY_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-sg-${TIMESTAMP}"
+    STACK_NAME="${PROJECT_NAME}-${ENVIRONMENT}-${TIMESTAMP}${RESOURCE_SUFFIX}"
+    DB_INSTANCE_IDENTIFIER="${PROJECT_NAME}-${ENVIRONMENT}-db-${TIMESTAMP}${RESOURCE_SUFFIX}"
+    REDIS_CLUSTER_ID="${PROJECT_NAME}-${ENVIRONMENT}-redis-${TIMESTAMP}${RESOURCE_SUFFIX}"
+    SECURITY_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-sg-${TIMESTAMP}${RESOURCE_SUFFIX}"
     
     print_success "Configuration validated"
 }
@@ -126,7 +159,7 @@ setup_networking() {
     fi
     
     # Use first two subnets
-    DB_SUBNET_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-subnet-group-${TIMESTAMP}"
+    DB_SUBNET_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-subnet-group-${TIMESTAMP}${RESOURCE_SUFFIX}"
     
     # Create DB subnet group
     aws rds create-db-subnet-group \
@@ -221,7 +254,7 @@ create_redis_cluster() {
     print_status "Creating Redis ElastiCache cluster..."
     
     # Create Redis subnet group
-    REDIS_SUBNET_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-redis-subnet-${TIMESTAMP}"
+    REDIS_SUBNET_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-redis-subnet-${TIMESTAMP}${RESOURCE_SUFFIX}"
     
     aws elasticache create-cache-subnet-group \
         --cache-subnet-group-name "$REDIS_SUBNET_GROUP_NAME" \

@@ -33,6 +33,15 @@ print_error() {
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Check if running in test mode
+if [ "$INFRASTRUCTURE_TEST_MODE" = "true" ]; then
+    RESOURCE_SUFFIX="${TEST_SUFFIX:-_test}"
+    print_status "Running in TEST MODE with suffix: $RESOURCE_SUFFIX"
+else
+    RESOURCE_SUFFIX=""
+    print_status "Running in PRODUCTION MODE"
+fi
+
 print_status "Starting complete AWS infrastructure setup..."
 print_status "Project root: $PROJECT_ROOT"
 print_status "Scripts directory: $SCRIPTS_DIR"
