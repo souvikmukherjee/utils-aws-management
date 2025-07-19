@@ -1,0 +1,56 @@
+---
+description: Git workflow rules - no automatic git operations without explicit permission
+globs: **/*
+alwaysApply: true
+---
+
+# Git Workflow Rules
+
+## 🚫 **CRITICAL: No Automatic Git Operations**
+
+- **NEVER** run `git add`, `git commit`, or `git push` without explicit user permission
+- **ALWAYS** ask the user before performing any git operations
+- **NEVER** assume the user wants changes committed automatically
+
+## Required Workflow
+
+### Before Any Git Operation:
+1. **Ask explicitly**: "Would you like me to commit these changes?"
+2. **Wait for confirmation** before proceeding
+3. **Respect user preference** if they decline
+
+### Examples of What NOT to Do:
+```bash
+# ❌ DON'T: Automatically commit after making changes
+git add .
+git commit -m "feat: Add new feature"
+
+# ❌ DON'T: Push without asking
+git push origin feature-branch
+```
+
+### Examples of What TO Do:
+```bash
+# ✅ DO: Ask first
+"Would you like me to commit these changes to git?"
+
+# ✅ DO: Wait for user confirmation
+# Only proceed after user says "yes" or "ok"
+```
+
+## Exception Cases
+
+- **Security fixes**: Still ask before committing, even for security-related changes
+- **Documentation updates**: Still require explicit permission
+- **Bug fixes**: Still require explicit permission
+- **Any git operation**: Always ask first
+
+## User Preferences
+
+- User has explicitly stated they do not want automatic git operations
+- This preference takes priority over any other workflow considerations
+- Always err on the side of asking rather than assuming
+
+## Reminder
+
+This rule is **CRITICAL** and should be checked before any git operation. The user has been clear about this preference and it must be respected.
