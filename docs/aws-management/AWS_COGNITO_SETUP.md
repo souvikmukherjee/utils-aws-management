@@ -24,7 +24,7 @@ The following environment variables have been configured in `.env.local`:
 
 ```
 NEXTAUTH_URL=http://localhost:3001
-NEXTAUTH_SECRET=8KhXZY9UqaB3UDZ4woNzJXjC8+wxzZuaFWPuDW2jZWs=
+NEXTAUTH_SECRET=your-nextauth-secret-key-here
 COGNITO_CLIENT_ID=4dalr0pp7j5folc1g33khf6ai1
 COGNITO_CLIENT_SECRET=
 COGNITO_ISSUER=https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_r24gyJxHq
