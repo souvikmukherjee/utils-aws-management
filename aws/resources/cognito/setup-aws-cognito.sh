@@ -198,15 +198,18 @@ create_user_pool() {
 create_cognito_domain() {
     print_status "Creating Cognito Domain..."
     
-    aws cognito-idp create-user-pool-domain \
-        --domain "$DOMAIN_PREFIX" \
-        --user-pool-id "$USER_POOL_ID" \
-        --output json >/dev/null
-    
     COGNITO_DOMAIN="$DOMAIN_PREFIX.auth.$AWS_REGION.amazoncognito.com"
     
-    print_success "Cognito Domain created successfully"
-    print_status "Domain: $COGNITO_DOMAIN"
+    if aws cognito-idp create-user-pool-domain \
+        --domain "$DOMAIN_PREFIX" \
+        --user-pool-id "$USER_POOL_ID" \
+        --output json >/dev/null 2>&1; then
+        print_success "Cognito Domain created successfully"
+        print_status "Domain: $COGNITO_DOMAIN"
+    else
+        print_warning "Cognito Domain already exists or creation failed, continuing..."
+        print_status "Domain: $COGNITO_DOMAIN"
+    fi
 }
 
 # Function to create App Client
