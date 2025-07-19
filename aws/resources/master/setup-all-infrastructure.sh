@@ -119,6 +119,23 @@ fix_redis_access() {
     fi
 }
 
+# Function to setup Cognito authentication
+setup_cognito() {
+    print_status "Setting up AWS Cognito authentication..."
+    
+    cd "$PROJECT_ROOT"
+    
+    # Run Cognito setup script
+    if [ -f "aws/resources/cognito/setup-aws-cognito.sh" ]; then
+        print_status "Running Cognito setup script..."
+        ./aws/resources/cognito/setup-aws-cognito.sh
+        print_success "Cognito authentication setup completed"
+    else
+        print_error "Cognito setup script not found"
+        exit 1
+    fi
+}
+
 # Function to setup database schema
 setup_database_schema() {
     print_status "Setting up database schema..."
@@ -276,6 +293,9 @@ main() {
     
     # Check prerequisites
     check_prerequisites
+    
+    # Setup Cognito authentication
+    setup_cognito
     
     # Setup database infrastructure
     setup_database

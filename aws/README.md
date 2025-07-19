@@ -14,7 +14,14 @@ aws/
 │   │   ├── setup-aws-database-simple.sh # Simplified database setup
 │   │   ├── fix-database-connectivity.sh # Database connectivity fixes
 │   │   ├── check-public-endpoints.sh   # Endpoint analysis
-│   │   └── cleanup-aws-resources.sh    # Infrastructure cleanup
+│   │   ├── cleanup-aws-resources.sh    # Infrastructure cleanup
+│   │   └── setup-credentials.sh        # AWS credentials setup
+│   ├── cognito/                        # AWS Cognito authentication scripts
+│   │   ├── setup-aws-cognito.sh        # Manual Cognito setup
+│   │   └── setup-aws-cognito-auto.sh   # Automated Cognito setup
+│   ├── auth/                           # Authentication management scripts
+│   │   ├── check-and-create-users.sh   # User creation and management
+│   │   └── fix-users.sh                # User password fixes
 │   ├── database/                       # Database-specific scripts
 │   │   ├── setup-database.sql          # Database schema (psql format)
 │   │   ├── setup-database-clean.sql    # Database schema (Node.js format)
@@ -67,6 +74,15 @@ cd aws/resources/master
 - **setup-all-infrastructure.sh**: Orchestrates complete infrastructure setup
 - **setup-aws-database.sh**: Creates RDS PostgreSQL and ElastiCache Redis
 - **cleanup-aws-resources.sh**: Removes all AWS resources
+- **setup-credentials.sh**: Sets up AWS credentials and configuration
+
+### Cognito Scripts (`resources/cognito/`)
+- **setup-aws-cognito.sh**: Manual AWS Cognito user pool and client setup
+- **setup-aws-cognito-auto.sh**: Automated Cognito setup with user creation
+
+### Auth Scripts (`resources/auth/`)
+- **check-and-create-users.sh**: Creates and manages Cognito users
+- **fix-users.sh**: Fixes user passwords and authentication issues
 
 ### Database Scripts (`resources/database/`)
 - **setup-database.sql**: Complete database schema with tables, indexes, triggers
@@ -86,6 +102,11 @@ cd aws/resources/master
 - **test-redis-*.js**: Various Redis connection tests
 
 ## Infrastructure Components
+
+### Authentication Infrastructure
+- **AWS Cognito**: User pool and identity pool for authentication
+- **User Management**: Demo and test users with proper permissions
+- **Security Policies**: Password policies and MFA configuration
 
 ### Database Infrastructure
 - **PostgreSQL RDS**: Managed PostgreSQL database

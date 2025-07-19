@@ -8,6 +8,12 @@ cd aws/resources/master
 ./setup-all-infrastructure.sh
 ```
 
+### Setup Cognito Authentication Only
+```bash
+cd aws/resources/cognito
+./setup-aws-cognito.sh
+```
+
 ### Start Database Access (SSH Tunnels)
 ```bash
 cd aws/resources/bastion
@@ -36,6 +42,12 @@ aws/
 │   │   ├── setup-aws-database.sh       # Database infrastructure setup
 │   │   ├── cleanup-aws-resources.sh    # Infrastructure cleanup
 │   │   └── ...                         # Other master scripts
+│   ├── cognito/                        # AWS Cognito authentication scripts
+│   │   ├── setup-aws-cognito.sh        # Manual Cognito setup
+│   │   └── setup-aws-cognito-auto.sh   # Automated Cognito setup
+│   ├── auth/                           # Authentication management scripts
+│   │   ├── check-and-create-users.sh   # User creation and management
+│   │   └── fix-users.sh                # User password fixes
 │   ├── database/                       # Database-specific scripts
 │   │   ├── setup-database.sql          # Database schema
 │   │   ├── setup-database-clean.sql    # Clean schema for Node.js
@@ -59,12 +71,42 @@ aws/
 - **`setup-aws-database.sh`** - Database infrastructure setup
 - **`cleanup-aws-resources.sh`** - Infrastructure cleanup
 
+### Cognito Scripts (`aws/resources/cognito/`)
+- **`setup-aws-cognito.sh`** 🎯 - Manual AWS Cognito setup
+- **`setup-aws-cognito-auto.sh`** - Automated Cognito setup
+
+### Auth Scripts (`aws/resources/auth/`)
+- **`check-and-create-users.sh`** - Creates and manages Cognito users
+- **`fix-users.sh`** - Fixes user passwords and authentication issues
+
 ### Bastion Scripts (`aws/resources/bastion/`)
 - **`setup-jump-box.sh`** - Creates EC2 jump box for SSH tunneling
 - **`tunnel-to-databases.sh`** 🎯 - Manages SSH tunnels to databases
 
 ### Test Scripts (`aws/test/`)
 - **`test-local-connections.js`** 🎯 - Main connectivity test through tunnels
+
+## 🏗️ Infrastructure Components
+
+### Authentication Infrastructure
+- **AWS Cognito**: User pool and identity pool for authentication
+- **User Management**: Demo and test users with proper permissions
+- **Security Policies**: Password policies and MFA configuration
+
+### Database Infrastructure
+- **PostgreSQL RDS**: Managed PostgreSQL database
+- **Redis ElastiCache**: Managed Redis caching layer
+- **Security Groups**: Properly configured for secure access
+
+### Jump Box (Bastion Host)
+- **EC2 Instance**: t3.micro instance for SSH tunneling
+- **Security Groups**: Restricted access to current IP only
+- **SSH Tunnels**: Secure access to private databases
+
+### Network Configuration
+- **VPC**: Custom VPC for resource isolation
+- **Subnets**: Properly configured subnets
+- **Security Groups**: Restrictive access policies
 
 ## 🌐 Access Information
 
