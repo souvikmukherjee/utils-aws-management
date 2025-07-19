@@ -53,7 +53,7 @@ async function setupDatabase() {
         console.log('✅ Connected to aws_management_dev database');
         
         // Read and execute the schema file
-        const schemaSQL = fs.readFileSync('setup-database-clean.sql', 'utf8');
+        const schemaSQL = fs.readFileSync('aws/resources/database/setup-database-clean.sql', 'utf8');
         await dbClient.query(schemaSQL);
         console.log('✅ Database schema created successfully');
         

@@ -46,7 +46,7 @@ echo "DB_PORT=$LOCAL_POSTGRES_PORT"
 echo "REDIS_HOST=localhost"
 echo "REDIS_PORT=$LOCAL_REDIS_PORT"
 echo ""
-echo "📝 To test connections, run: node test-local-connections.js"
+echo "📝 To test connections, run: node aws/test/test-local-connections.js"
 echo "🛑 Press Ctrl+C to close tunnels"
 echo ""
 
