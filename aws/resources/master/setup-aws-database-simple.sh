@@ -305,7 +305,7 @@ generate_env_vars() {
     cat > .env.local << EOF
 # NextAuth.js Configuration
 NEXTAUTH_URL=http://localhost:3001
-NEXTAUTH_SECRET=8KhXZY9UqaB3UDZ4woNzJXjC8+wxzZuaFWPuDW2jZWs=
+NEXTAUTH_SECRET=your-nextauth-secret-key-here
 
 # AWS Cognito Configuration
 COGNITO_CLIENT_ID=4dalr0pp7j5folc1g33khf6ai1
@@ -317,9 +317,9 @@ AWS_REGION=$AWS_REGION
 
 # Demo Authentication Credentials (for development only)
 DEMO_USER_EMAIL=demo@example.com
-DEMO_USER_PASSWORD=DemoPass123!
+DEMO_USER_PASSWORD=your-demo-user-password-here
 TEST_USER_EMAIL=test@example.com
-TEST_USER_PASSWORD=TestPass123!
+TEST_USER_PASSWORD=your-test-user-password-here
 
 # Database Configuration
 DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@${DB_ENDPOINT}:5432/${PROJECT_NAME}_${ENVIRONMENT}
