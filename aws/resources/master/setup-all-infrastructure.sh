@@ -86,7 +86,12 @@ setup_database() {
     # Run database setup script
     if [ -f "aws/resources/master/setup-aws-database.sh" ]; then
         print_status "Running database setup script..."
-        ./aws/resources/master/setup-aws-database.sh
+        # Pass test mode environment variables if they exist
+        if [ "$INFRASTRUCTURE_TEST_MODE" = "true" ]; then
+            INFRASTRUCTURE_TEST_MODE=true TEST_SUFFIX="$TEST_SUFFIX" ./aws/resources/master/setup-aws-database.sh
+        else
+            ./aws/resources/master/setup-aws-database.sh
+        fi
         print_success "Database infrastructure setup completed"
     else
         print_error "Database setup script not found"
@@ -103,7 +108,12 @@ setup_jump_box() {
     # Run jump box setup script
     if [ -f "aws/resources/bastion/setup-jump-box.sh" ]; then
         print_status "Running jump box setup script..."
-        ./aws/resources/bastion/setup-jump-box.sh
+        # Pass test mode environment variables if they exist
+        if [ "$INFRASTRUCTURE_TEST_MODE" = "true" ]; then
+            INFRASTRUCTURE_TEST_MODE=true TEST_SUFFIX="$TEST_SUFFIX" ./aws/resources/bastion/setup-jump-box.sh
+        else
+            ./aws/resources/bastion/setup-jump-box.sh
+        fi
         print_success "Jump box setup completed"
     else
         print_error "Jump box setup script not found"
@@ -137,7 +147,12 @@ setup_cognito() {
     # Run Cognito setup script
     if [ -f "aws/resources/cognito/setup-aws-cognito.sh" ]; then
         print_status "Running Cognito setup script..."
-        ./aws/resources/cognito/setup-aws-cognito.sh
+        # Pass test mode environment variables if they exist
+        if [ "$INFRASTRUCTURE_TEST_MODE" = "true" ]; then
+            INFRASTRUCTURE_TEST_MODE=true TEST_SUFFIX="$TEST_SUFFIX" ./aws/resources/cognito/setup-aws-cognito.sh
+        else
+            ./aws/resources/cognito/setup-aws-cognito.sh
+        fi
         print_success "Cognito authentication setup completed"
     else
         print_error "Cognito setup script not found"

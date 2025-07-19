@@ -1,7 +1,7 @@
 # AWS Infrastructure Test Report
 
 ## Test Summary
-- **Test Date**: Sun Jul 20 04:00:56 AEST 2025
+- **Test Date**: Sun Jul 20 04:02:53 AEST 2025
 - **Test Duration**: 0 minutes
 - **Test Status**: FAILED
 
@@ -17,7 +17,7 @@
 - [x] Resource Cleanup
 
 ## Test Results
-- ❌ test_database_connectivity failed\n\nSome test phases failed. Please review the errors above.
+- ❌ test_application_integration failed\n\nSome test phases failed. Please review the errors above.
 
 ## Recommendations
 Review the failed phases and fix any issues before using in production.
