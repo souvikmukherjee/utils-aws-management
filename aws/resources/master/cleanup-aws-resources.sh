@@ -131,7 +131,7 @@ cleanup_cognito_resources() {
     print_status "Cleaning up Cognito resources..."
     
     # Find user pools with our naming pattern
-    USER_POOLS=$(aws cognito-idp list-user-pools --max-items 20 --query "UserPools[?contains(Name, 'aws-management-dev') && contains(Name, '$RESOURCE_SUFFIX')].Id" --output text)
+    USER_POOLS=$(aws cognito-idp list-user-pools --max-results 20 --query "UserPools[?contains(Name, 'aws-management-dev') && contains(Name, '$RESOURCE_SUFFIX')].Id" --output text)
     
     for pool_id in $USER_POOLS; do
         if [ ! -z "$pool_id" ]; then

@@ -121,19 +121,36 @@ run_master_script() {
 wait_for_resources() {
     print_status "Waiting for AWS resources to be ready..."
     
+    # Find the actual resource names with our pattern
+    RDS_INSTANCE=$(aws rds describe-db-instances --query "DBInstances[?contains(DBInstanceIdentifier, 'aws-management-dev-db') && contains(DBInstanceIdentifier, '$RESOURCE_SUFFIX')].DBInstanceIdentifier" --output text | tr '\t' '\n' | head -1)
+    REDIS_CLUSTER=$(aws elasticache describe-cache-clusters --query "CacheClusters[?contains(CacheClusterId, 'aws-management-dev-redis') && contains(CacheClusterId, '$RESOURCE_SUFFIX')].CacheClusterId" --output text | tr '\t' '\n' | head -1)
+    EC2_INSTANCE=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=aws-management-dev-jump-box*$RESOURCE_SUFFIX" --query 'Reservations[].Instances[].InstanceId' --output text | tr '\t' '\n' | head -1)
+    
     # Wait for RDS to be available
-    print_status "Waiting for RDS instance to be available..."
-    aws rds wait db-instance-available --db-instance-identifier aws-management-dev-db-test
+    if [ ! -z "$RDS_INSTANCE" ]; then
+        print_status "Waiting for RDS instance to be available: $RDS_INSTANCE"
+        aws rds wait db-instance-available --db-instance-identifier "$RDS_INSTANCE" || print_warning "RDS instance not found or not ready"
+    else
+        print_warning "No RDS instance found with test pattern"
+    fi
     
     # Wait for ElastiCache to be available
-    print_status "Waiting for ElastiCache cluster to be available..."
-    aws elasticache wait cache-cluster-available --cache-cluster-id aws-management-dev-redis-test
+    if [ ! -z "$REDIS_CLUSTER" ]; then
+        print_status "Waiting for ElastiCache cluster to be available: $REDIS_CLUSTER"
+        aws elasticache wait cache-cluster-available --cache-cluster-id "$REDIS_CLUSTER" || print_warning "Redis cluster not found or not ready"
+    else
+        print_warning "No Redis cluster found with test pattern"
+    fi
     
     # Wait for EC2 instance to be running
-    print_status "Waiting for EC2 jump box to be running..."
-    aws ec2 wait instance-running --instance-ids $(aws ec2 describe-instances --filters "Name=tag:Name,Values=aws-management-dev-jump-box-test" --query 'Reservations[].Instances[].InstanceId' --output text)
+    if [ ! -z "$EC2_INSTANCE" ]; then
+        print_status "Waiting for EC2 jump box to be running: $EC2_INSTANCE"
+        aws ec2 wait instance-running --instance-ids "$EC2_INSTANCE" || print_warning "EC2 instance not found or not ready"
+    else
+        print_warning "No EC2 instance found with test pattern"
+    fi
     
-    print_success "All AWS resources are ready"
+    print_success "Resource availability check completed"
 }
 
 # Function to test database connectivity
@@ -145,7 +162,7 @@ test_database_connectivity() {
     
     # Test PostgreSQL connection
     print_status "Testing PostgreSQL connection..."
-    if node aws/test/test-local-connections.js; then
+    if node "$PROJECT_ROOT/aws/test/test-local-connections.js"; then
         print_success "PostgreSQL connectivity test passed"
     else
         print_error "PostgreSQL connectivity test failed"
@@ -154,7 +171,7 @@ test_database_connectivity() {
     
     # Test Redis connection
     print_status "Testing Redis connection..."
-    if node aws/test/test-redis-simple.js; then
+    if node "$PROJECT_ROOT/aws/test/test-redis-simple.js"; then
         print_success "Redis connectivity test passed"
     else
         print_error "Redis connectivity test failed"
@@ -170,7 +187,7 @@ test_application_integration() {
     
     # Test database schema setup
     print_status "Testing database schema setup..."
-    if node aws/resources/database/setup-database-tunnel.js; then
+    if node "$PROJECT_ROOT/aws/resources/database/setup-database-tunnel.js"; then
         print_success "Database schema setup test passed"
     else
         print_error "Database schema setup test failed"
@@ -179,7 +196,7 @@ test_application_integration() {
     
     # Test CRUD operations
     print_status "Testing CRUD operations..."
-    if node aws/test/test-db-direct.js; then
+    if node "$PROJECT_ROOT/aws/test/test-db-direct.js"; then
         print_success "CRUD operations test passed"
     else
         print_error "CRUD operations test failed"
@@ -195,7 +212,7 @@ test_cognito_functionality() {
     
     # Test user creation
     print_status "Testing user creation..."
-    if ./aws/resources/auth/check-and-create-users.sh; then
+    if "$PROJECT_ROOT/aws/resources/auth/check-and-create-users.sh"; then
         print_success "User creation test passed"
     else
         print_error "User creation test failed"

@@ -77,7 +77,7 @@ get_user_input() {
         PROJECT_NAME="aws-management-utilities"
         USER_POOL_NAME="${PROJECT_NAME}-user-pool${RESOURCE_SUFFIX}"
         APP_CLIENT_NAME="${PROJECT_NAME}-web-app${RESOURCE_SUFFIX}"
-        DOMAIN_PREFIX="${PROJECT_NAME}-auth${RESOURCE_SUFFIX}"
+        DOMAIN_PREFIX="${PROJECT_NAME}-auth${RESOURCE_SUFFIX//_/-}"
         CALLBACK_URL="http://localhost:3001/api/auth/callback/cognito"
         SIGNOUT_URL="http://localhost:3001/auth/signin"
         ALLOWED_ORIGINS="http://localhost:3001"
