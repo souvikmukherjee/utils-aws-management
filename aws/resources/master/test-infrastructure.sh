@@ -121,9 +121,10 @@ run_master_script() {
 wait_for_resources() {
     print_status "Waiting for AWS resources to be ready..."
     
-    # Find the actual resource names with our pattern
-    RDS_INSTANCE=$(aws rds describe-db-instances --query "DBInstances[?contains(DBInstanceIdentifier, 'aws-management-dev-db') && contains(DBInstanceIdentifier, '$RESOURCE_SUFFIX')].DBInstanceIdentifier" --output text | tr '\t' '\n' | head -1)
-    REDIS_CLUSTER=$(aws elasticache describe-cache-clusters --query "CacheClusters[?contains(CacheClusterId, 'aws-management-dev-redis') && contains(CacheClusterId, '$RESOURCE_SUFFIX')].CacheClusterId" --output text | tr '\t' '\n' | head -1)
+    # Find the actual resource names with our pattern (convert underscore to hyphen for AWS resources)
+    RESOURCE_PATTERN="${RESOURCE_SUFFIX//_/-}"
+    RDS_INSTANCE=$(aws rds describe-db-instances --query "DBInstances[?contains(DBInstanceIdentifier, 'aws-management-dev-db') && contains(DBInstanceIdentifier, '$RESOURCE_PATTERN')].DBInstanceIdentifier" --output text | tr '\t' '\n' | head -1)
+    REDIS_CLUSTER=$(aws elasticache describe-cache-clusters --query "CacheClusters[?contains(CacheClusterId, 'aws-management-dev-redis') && contains(CacheClusterId, '$RESOURCE_PATTERN')].CacheClusterId" --output text | tr '\t' '\n' | head -1)
     EC2_INSTANCE=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=aws-management-dev-jump-box*$RESOURCE_SUFFIX" --query 'Reservations[].Instances[].InstanceId' --output text | tr '\t' '\n' | head -1)
     
     # Wait for RDS to be available

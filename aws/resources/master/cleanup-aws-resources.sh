@@ -45,8 +45,9 @@ print_status "🧹 Cleaning up AWS resources..."
 cleanup_redis_clusters() {
     print_status "Cleaning up Redis clusters..."
     
-    # Find Redis clusters with our naming pattern
-    REDIS_CLUSTERS=$(aws elasticache describe-cache-clusters --query "CacheClusters[?contains(CacheClusterId, 'aws-management-dev-redis') && contains(CacheClusterId, '$RESOURCE_SUFFIX')].CacheClusterId" --output text)
+    # Find Redis clusters with our naming pattern (convert underscore to hyphen for AWS resources)
+    RESOURCE_PATTERN="${RESOURCE_SUFFIX//_/-}"
+    REDIS_CLUSTERS=$(aws elasticache describe-cache-clusters --query "CacheClusters[?contains(CacheClusterId, 'aws-management-dev-redis') && contains(CacheClusterId, '$RESOURCE_PATTERN')].CacheClusterId" --output text)
     
     for cluster_id in $REDIS_CLUSTERS; do
         if [ ! -z "$cluster_id" ]; then
@@ -60,8 +61,9 @@ cleanup_redis_clusters() {
 cleanup_rds_instances() {
     print_status "Cleaning up RDS instances..."
     
-    # Find RDS instances with our naming pattern
-    RDS_INSTANCES=$(aws rds describe-db-instances --query "DBInstances[?contains(DBInstanceIdentifier, 'aws-management-dev-db') && contains(DBInstanceIdentifier, '$RESOURCE_SUFFIX')].DBInstanceIdentifier" --output text)
+    # Find RDS instances with our naming pattern (convert underscore to hyphen for AWS resources)
+    RESOURCE_PATTERN="${RESOURCE_SUFFIX//_/-}"
+    RDS_INSTANCES=$(aws rds describe-db-instances --query "DBInstances[?contains(DBInstanceIdentifier, 'aws-management-dev-db') && contains(DBInstanceIdentifier, '$RESOURCE_PATTERN')].DBInstanceIdentifier" --output text)
     
     for instance_id in $RDS_INSTANCES; do
         if [ ! -z "$instance_id" ]; then
@@ -90,8 +92,9 @@ cleanup_security_groups() {
 cleanup_subnet_groups() {
     print_status "Cleaning up subnet groups..."
     
-    # Find DB subnet groups with our naming pattern
-    DB_SUBNET_GROUPS=$(aws rds describe-db-subnet-groups --query "DBSubnetGroups[?contains(DBSubnetGroupName, 'aws-management-dev-subnet-group') && contains(DBSubnetGroupName, '$RESOURCE_SUFFIX')].DBSubnetGroupName" --output text)
+    # Find DB subnet groups with our naming pattern (convert underscore to hyphen for AWS resources)
+    RESOURCE_PATTERN="${RESOURCE_SUFFIX//_/-}"
+    DB_SUBNET_GROUPS=$(aws rds describe-db-subnet-groups --query "DBSubnetGroups[?contains(DBSubnetGroupName, 'aws-management-dev-subnet-group') && contains(DBSubnetGroupName, '$RESOURCE_PATTERN')].DBSubnetGroupName" --output text)
     
     for subnet_group in $DB_SUBNET_GROUPS; do
         if [ ! -z "$subnet_group" ]; then
@@ -100,8 +103,9 @@ cleanup_subnet_groups() {
         fi
     done
     
-    # Find Redis subnet groups with our naming pattern
-    REDIS_SUBNET_GROUPS=$(aws elasticache describe-cache-subnet-groups --query "CacheSubnetGroups[?contains(CacheSubnetGroupName, 'aws-management-dev-redis-subnet') && contains(CacheSubnetGroupName, '$RESOURCE_SUFFIX')].CacheSubnetGroupName" --output text)
+    # Find Redis subnet groups with our naming pattern (convert underscore to hyphen for AWS resources)
+    RESOURCE_PATTERN="${RESOURCE_SUFFIX//_/-}"
+    REDIS_SUBNET_GROUPS=$(aws elasticache describe-cache-subnet-groups --query "CacheSubnetGroups[?contains(CacheSubnetGroupName, 'aws-management-dev-redis-subnet') && contains(CacheSubnetGroupName, '$RESOURCE_PATTERN')].CacheSubnetGroupName" --output text)
     
     for subnet_group in $REDIS_SUBNET_GROUPS; do
         if [ ! -z "$subnet_group" ]; then

@@ -130,9 +130,10 @@ get_user_input() {
     # Generate unique identifiers
     TIMESTAMP=$(date +%s)
     STACK_NAME="${PROJECT_NAME}-${ENVIRONMENT}-${TIMESTAMP}${RESOURCE_SUFFIX}"
-    DB_INSTANCE_IDENTIFIER="${PROJECT_NAME}-${ENVIRONMENT}-db-${TIMESTAMP}${RESOURCE_SUFFIX}"
-    REDIS_CLUSTER_ID="${PROJECT_NAME}-${ENVIRONMENT}-redis-${TIMESTAMP}${RESOURCE_SUFFIX}"
-    SECURITY_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-sg-${TIMESTAMP}${RESOURCE_SUFFIX}"
+    # Ensure RDS identifier follows AWS naming rules (no trailing hyphen, no consecutive hyphens)
+    DB_INSTANCE_IDENTIFIER="${PROJECT_NAME}-${ENVIRONMENT}-db-${TIMESTAMP}${RESOURCE_SUFFIX//_/-}"
+    REDIS_CLUSTER_ID="${PROJECT_NAME}-${ENVIRONMENT}-redis-${TIMESTAMP}${RESOURCE_SUFFIX//_/-}"
+    SECURITY_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-sg-${TIMESTAMP}${RESOURCE_SUFFIX//_/-}"
     
     print_success "Configuration validated"
 }
@@ -159,7 +160,7 @@ setup_networking() {
     fi
     
     # Use first two subnets
-    DB_SUBNET_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-subnet-group-${TIMESTAMP}${RESOURCE_SUFFIX}"
+    DB_SUBNET_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-subnet-group-${TIMESTAMP}${RESOURCE_SUFFIX//_/-}"
     
     # Create DB subnet group
     aws rds create-db-subnet-group \
@@ -254,7 +255,7 @@ create_redis_cluster() {
     print_status "Creating Redis ElastiCache cluster..."
     
     # Create Redis subnet group
-    REDIS_SUBNET_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-redis-subnet-${TIMESTAMP}${RESOURCE_SUFFIX}"
+    REDIS_SUBNET_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-redis-subnet-${TIMESTAMP}${RESOURCE_SUFFIX//_/-}"
     
     aws elasticache create-cache-subnet-group \
         --cache-subnet-group-name "$REDIS_SUBNET_GROUP_NAME" \
