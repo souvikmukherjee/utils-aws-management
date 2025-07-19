@@ -108,25 +108,6 @@ get_user_input() {
         fi
     fi
     
-    # Get database instance type
-    read -p "RDS instance type (default: db.t3.micro): " DB_INSTANCE_TYPE
-    DB_INSTANCE_TYPE=${DB_INSTANCE_TYPE:-db.t3.micro}
-    
-    # Get Redis node type
-    read -p "Redis node type (default: cache.t3.micro): " REDIS_NODE_TYPE
-    REDIS_NODE_TYPE=${REDIS_NODE_TYPE:-cache.t3.micro}
-    
-    # Get database password
-    read -s -p "Database master password: " DB_PASSWORD
-    echo
-    read -s -p "Confirm database master password: " DB_PASSWORD_CONFIRM
-    echo
-    
-    if [ "$DB_PASSWORD" != "$DB_PASSWORD_CONFIRM" ]; then
-        print_error "Passwords do not match"
-        exit 1
-    fi
-    
     # Generate unique identifiers
     TIMESTAMP=$(date +%s)
     STACK_NAME="${PROJECT_NAME}-${ENVIRONMENT}-${TIMESTAMP}${RESOURCE_SUFFIX}"
