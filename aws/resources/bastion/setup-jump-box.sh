@@ -50,10 +50,12 @@ SECURITY_GROUP_NAME="${PROJECT_NAME}-${ENVIRONMENT}-jump-sg-${TIMESTAMP}${RESOUR
 print_status "Getting existing VPC and subnet information..."
 
 # Get VPC ID from RDS instance (find the most recent one with our pattern)
-DB_INSTANCE_IDENTIFIER=$(aws rds describe-db-instances --query "DBInstances[?contains(DBInstanceIdentifier, 'aws-management-dev-db') && contains(DBInstanceIdentifier, '$RESOURCE_SUFFIX')].DBInstanceIdentifier" --output text | tr '\t' '\n' | head -1)
+# Convert underscore to hyphen for AWS resources
+RESOURCE_PATTERN="${RESOURCE_SUFFIX//_/-}"
+DB_INSTANCE_IDENTIFIER=$(aws rds describe-db-instances --query "DBInstances[?contains(DBInstanceIdentifier, 'aws-management-dev-db') && contains(DBInstanceIdentifier, '$RESOURCE_PATTERN')].DBInstanceIdentifier" --output text | tr '\t' '\n' | head -1)
 
 if [ -z "$DB_INSTANCE_IDENTIFIER" ]; then
-    print_error "No RDS instance found with pattern 'aws-management-dev-db*$RESOURCE_SUFFIX'"
+    print_error "No RDS instance found with pattern 'aws-management-dev-db*$RESOURCE_PATTERN'"
     exit 1
 fi
 

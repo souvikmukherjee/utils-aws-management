@@ -4,13 +4,13 @@
 
 ### User Pool
 - **Name**: aws-management-utilities-user-pool_test
-- **ID**: ap-southeast-2_6aFDEE2mH
-- **ARN**: arn:aws:cognito-idp:ap-southeast-2:427793686436:userpool/ap-southeast-2_6aFDEE2mH
+- **ID**: ap-southeast-2_kB1m1z7g9
+- **ARN**: arn:aws:cognito-idp:ap-southeast-2:427793686436:userpool/ap-southeast-2_kB1m1z7g9
 
 ### App Client
 - **Name**: aws-management-utilities-web-app_test
-- **Client ID**: qgid6cim07afcb9h0a6c0g6kd
-- **Client Secret**: 5fecjh94oofbg60nbn32mnl09j46iboratfvalchii2so7io7h0
+- **Client ID**: 1rtv3rok5tjru413cf6pjb8bcf
+- **Client Secret**: 13h610ja6dpkv8nip53r5jd8ngcs04sp9l4tlkt94pu2ovt1lndp
 
 ### Domain
 - **Domain**: management-utilities-auth-test.auth.ap-southeast-2.amazoncognito.com
@@ -26,10 +26,10 @@ The following environment variables have been configured in `.env.local`:
 
 ```bash
 NEXTAUTH_URL=http://localhost:3001
-NEXTAUTH_SECRET=qBQFP5jT6FDXkuercCeuQ1kTe3Q4nka1kHgAfyaDMjI=
-COGNITO_CLIENT_ID=qgid6cim07afcb9h0a6c0g6kd
-COGNITO_CLIENT_SECRET=5fecjh94oofbg60nbn32mnl09j46iboratfvalchii2so7io7h0
-COGNITO_ISSUER=https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_6aFDEE2mH
+NEXTAUTH_SECRET=Oixl6nenq5PNhOBvIOjJ/DhxZ6hPiLqBJwgfvwswZfQ=
+COGNITO_CLIENT_ID=1rtv3rok5tjru413cf6pjb8bcf
+COGNITO_CLIENT_SECRET=13h610ja6dpkv8nip53r5jd8ngcs04sp9l4tlkt94pu2ovt1lndp
+COGNITO_ISSUER=https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_kB1m1z7g9
 AWS_REGION=ap-southeast-2
 ```
 
@@ -52,7 +52,7 @@ AWS_REGION=ap-southeast-2
 ## AWS Console Links
 
 - **Cognito User Pools**: https://console.aws.amazon.com/cognito/users/
-- **Your User Pool**: https://console.aws.amazon.com/cognito/users/?region=ap-southeast-2#/pool/ap-southeast-2_6aFDEE2mH/users
+- **Your User Pool**: https://console.aws.amazon.com/cognito/users/?region=ap-southeast-2#/pool/ap-southeast-2_kB1m1z7g9/users
 
 ## Security Notes
 
