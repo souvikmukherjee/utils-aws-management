@@ -80,78 +80,136 @@ mark_failed_phase() {
 
 # Cleanup function
 cleanup_on_failure() {
-    print_error "🛑 Test infrastructure failed! Starting cleanup..."
+    print_error "🛑 Test infrastructure failed! Starting emergency cleanup..."
     
-    if [ ! -f "$STATE_FILE" ]; then
-        print_warning "No state file found. Manual cleanup may be required."
-        return
+    # Mark cleanup as started in state file if it exists
+    if [ -f "$STATE_FILE" ]; then
+        jq '.cleanup_started = "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"' "$STATE_FILE" > "$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
+        print_status "Marked cleanup start in state file"
     fi
     
-    # Mark cleanup as started
-    jq '.cleanup_started = "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"' "$STATE_FILE" > "$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
-    
-    print_status "Cleaning up resources from state file..."
-    
-    # Get resources to clean up
-    local resources=$(jq -r '.resources_created[] | "\(.type)|\(.id)|\(.name)"' "$STATE_FILE" 2>/dev/null || echo "")
-    
-    if [ -z "$resources" ]; then
-        print_warning "No resources found in state file"
-        return
-    fi
-    
-    echo "$(date): Starting cleanup of $(echo "$resources" | wc -l) resources" >> "$CLEANUP_LOG"
-    
-    while IFS='|' read -r resource_type resource_id resource_name; do
-        if [ -n "$resource_id" ]; then
-            print_status "Cleaning up $resource_type: $resource_id"
-            echo "$(date): Cleaning up $resource_type: $resource_id" >> "$CLEANUP_LOG"
+    # First, try to clean up based on state file if it exists
+    if [ -f "$STATE_FILE" ]; then
+        print_status "Attempting cleanup based on state file..."
+        
+        # Get resources to clean up
+        local resources=$(jq -r '.resources_created[] | "\(.type)|\(.id)|\(.name)"' "$STATE_FILE" 2>/dev/null || echo "")
+        
+        if [ -n "$resources" ]; then
+            echo "$(date): Starting state-based cleanup of $(echo "$resources" | wc -l) resources" >> "$CLEANUP_LOG"
             
-            case $resource_type in
-                "RDS_INSTANCE")
-                    aws rds delete-db-instance --db-instance-identifier "$resource_id" --skip-final-snapshot --delete-automated-backups 2>/dev/null || true
-                    ;;
-                "REDIS_CLUSTER")
-                    aws elasticache delete-cache-cluster --cache-cluster-id "$resource_id" 2>/dev/null || true
-                    ;;
-                "EC2_INSTANCE")
-                    aws ec2 terminate-instances --instance-ids "$resource_id" 2>/dev/null || true
-                    ;;
-                "SECURITY_GROUP")
-                    aws ec2 delete-security-group --group-id "$resource_id" 2>/dev/null || true
-                    ;;
-                "KEY_PAIR")
-                    aws ec2 delete-key-pair --key-name "$resource_id" 2>/dev/null || true
-                    ;;
-                "DB_SUBNET_GROUP")
-                    aws rds delete-db-subnet-group --db-subnet-group-name "$resource_id" 2>/dev/null || true
-                    ;;
-                "REDIS_SUBNET_GROUP")
-                    aws elasticache delete-cache-subnet-group --cache-subnet-group-name "$resource_id" 2>/dev/null || true
-                    ;;
-                "COGNITO_USER_POOL")
-                    aws cognito-idp delete-user-pool --user-pool-id "$resource_id" 2>/dev/null || true
-                    ;;
-                "COGNITO_CLIENT")
-                    # Note: Client deletion is handled with user pool deletion
-                    ;;
-                *)
-                    print_warning "Unknown resource type: $resource_type"
-                    ;;
-            esac
+            while IFS='|' read -r resource_type resource_id resource_name; do
+                if [ -n "$resource_id" ]; then
+                    print_status "Cleaning up $resource_type: $resource_id"
+                    echo "$(date): Cleaning up $resource_type: $resource_id" >> "$CLEANUP_LOG"
+                    
+                    case $resource_type in
+                        "RDS_INSTANCE")
+                            aws rds delete-db-instance --db-instance-identifier "$resource_id" --skip-final-snapshot --delete-automated-backups 2>/dev/null || true
+                            ;;
+                        "REDIS_CLUSTER")
+                            aws elasticache delete-cache-cluster --cache-cluster-id "$resource_id" 2>/dev/null || true
+                            ;;
+                        "EC2_INSTANCE")
+                            aws ec2 terminate-instances --instance-ids "$resource_id" 2>/dev/null || true
+                            ;;
+                        "SECURITY_GROUP")
+                            aws ec2 delete-security-group --group-id "$resource_id" 2>/dev/null || true
+                            ;;
+                        "KEY_PAIR")
+                            aws ec2 delete-key-pair --key-name "$resource_id" 2>/dev/null || true
+                            ;;
+                        "DB_SUBNET_GROUP")
+                            aws rds delete-db-subnet-group --db-subnet-group-name "$resource_id" 2>/dev/null || true
+                            ;;
+                        "REDIS_SUBNET_GROUP")
+                            aws elasticache delete-cache-subnet-group --cache-subnet-group-name "$resource_id" 2>/dev/null || true
+                            ;;
+                        "COGNITO_USER_POOL")
+                            aws cognito-idp delete-user-pool --user-pool-id "$resource_id" 2>/dev/null || true
+                            ;;
+                        "COGNITO_CLIENT")
+                            # Note: Client deletion is handled with user pool deletion
+                            ;;
+                        *)
+                            print_warning "Unknown resource type: $resource_type"
+                            ;;
+                    esac
+                fi
+            done <<< "$resources"
+            
+            print_success "State-based cleanup completed"
+        else
+            print_warning "No resources found in state file"
         fi
-    done <<< "$resources"
+    else
+        print_warning "No state file found for state-based cleanup"
+    fi
     
-    # Mark cleanup as completed
-    jq '.cleanup_completed = true' "$STATE_FILE" > "$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
+    # Now run the emergency cleanup script to catch any orphaned resources
+    print_status "🚨 Running emergency cleanup script to catch orphaned resources..."
     
-    print_success "Cleanup completed. Check $CLEANUP_LOG for details."
-    echo "$(date): Cleanup completed" >> "$CLEANUP_LOG"
+    if [ -f "./aws/resources/master/emergency-cleanup.sh" ]; then
+        print_status "Executing emergency cleanup script..."
+        echo "$(date): Starting emergency cleanup script" >> "$CLEANUP_LOG"
+        
+        # Run emergency cleanup with reduced output
+        if ./aws/resources/master/emergency-cleanup.sh 2>&1 | tee -a "$CLEANUP_LOG"; then
+            print_success "Emergency cleanup script completed successfully"
+        else
+            print_warning "Emergency cleanup script had some issues, but continuing..."
+        fi
+    else
+        print_error "Emergency cleanup script not found at ./aws/resources/master/emergency-cleanup.sh"
+        print_error "Manual cleanup may be required to prevent AWS charges"
+    fi
+    
+    # Mark cleanup as completed in state file if it exists
+    if [ -f "$STATE_FILE" ]; then
+        jq '.cleanup_completed = true' "$STATE_FILE" > "$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
+    fi
+    
+    print_success "Emergency cleanup completed. Check $CLEANUP_LOG for details."
+    echo "$(date): Emergency cleanup completed" >> "$CLEANUP_LOG"
+    
+    # Generate failure report
+    print_status "📊 Generating failure report..."
+    
+    cat > TEST_FAILURE_REPORT.md << EOF
+# Infrastructure Test Failure Report
+
+## Failure Summary
+- **Test Started**: $(jq -r '.test_started // "Unknown"' "$STATE_FILE" 2>/dev/null || echo "Unknown")
+- **Test Failed**: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+- **Failed Phase**: $(jq -r '.failed_phase // "Unknown"' "$STATE_FILE" 2>/dev/null || echo "Unknown")
+- **Status**: ❌ FAILED
+
+## Resources Created Before Failure
+$(jq -r '.resources_created[] | "- \(.type): \(.name) (\(.id)) - Created: \(.created_at)"' "$STATE_FILE" 2>/dev/null || echo "No resources tracked")
+
+## Cleanup Status
+- **State-based Cleanup**: $(if [ -f "$STATE_FILE" ]; then echo "Attempted"; else echo "Not available"; fi)
+- **Emergency Cleanup**: $(if [ -f "./aws/resources/master/emergency-cleanup.sh" ]; then echo "Executed"; else echo "Script not found"; fi)
+- **Cleanup Log**: $CLEANUP_LOG
+
+## Next Steps
+1. Review the failure logs above
+2. Check AWS console for any remaining resources
+3. Run emergency cleanup manually if needed: \`./aws/resources/master/emergency-cleanup.sh\`
+4. Fix the issue and re-run the test
+
+## Important Notes
+- Emergency cleanup has been executed to minimize AWS charges
+- Check the cleanup log for details on what was cleaned up
+- Some resources may take time to be fully deleted from AWS
+EOF
+
+    print_success "Failure report generated: TEST_FAILURE_REPORT.md"
 }
 
 # Trap handlers for cleanup
-trap 'cleanup_on_failure; exit 1' ERR
-trap 'cleanup_on_failure; exit 1' INT TERM
+trap 'print_error "🛑 Script interrupted or failed. Starting emergency cleanup..."; cleanup_on_failure; exit 1' ERR
+trap 'print_error "🛑 Script interrupted by user. Starting emergency cleanup..."; cleanup_on_failure; exit 1' INT TERM
 
 # Check prerequisites
 print_status "🔍 Checking prerequisites..."
@@ -175,6 +233,14 @@ for tool in jq curl; do
         exit 1
     fi
 done
+
+# Ensure emergency cleanup script is executable
+if [ -f "./aws/resources/master/emergency-cleanup.sh" ]; then
+    chmod +x "./aws/resources/master/emergency-cleanup.sh"
+    print_status "Emergency cleanup script is ready"
+else
+    print_warning "Emergency cleanup script not found - will use state-based cleanup only"
+fi
 
 print_success "Prerequisites check passed"
 
@@ -504,4 +570,5 @@ print_success "Check TEST_REPORT.md for detailed results"
 # Remove trap handlers since we completed successfully
 trap - ERR INT TERM
 
+print_status "✅ Test completed without failures - no emergency cleanup needed"
 exit 0 
