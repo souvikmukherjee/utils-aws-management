@@ -76,7 +76,7 @@ get_user_input() {
         ENVIRONMENT="dev"
         DB_INSTANCE_TYPE="db.t3.micro"
         REDIS_NODE_TYPE="cache.t3.micro"
-        DB_PASSWORD="test_password_123"
+        DB_PASSWORD="[PASSWORD]"
         print_success "Using test configuration"
     else
         RESOURCE_SUFFIX=""

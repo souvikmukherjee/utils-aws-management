@@ -117,7 +117,7 @@ DB_HOST=localhost
 DB_PORT=5433
 DB_NAME=aws_management_test
 DB_USER=postgres
-DB_PASSWORD=test_password_123
+DB_PASSWORD=[PASSWORD]
 
 # Test Redis Configuration
 REDIS_HOST=localhost
@@ -139,7 +139,7 @@ NEXTAUTH_URL=http://localhost:3000
 - **RDS Instance Type**: `db.t3.micro`
 - **Redis Node Type**: `cache.t3.micro`
 - **EC2 Instance Type**: `t3.micro`
-- **Database Password**: `test_password_123`
+- **Database Password**: `[PASSWORD]`
 - **Region**: `ap-southeast-2`
 
 ## 🛡️ Safety Features

@@ -6,8 +6,8 @@
 set -e
 
 # Configuration
-JUMP_BOX_IP="13.211.165.169"
-KEY_FILE="aws-management-dev-key-1752952389.pem"
+JUMP_BOX_IP="52.62.2.252"
+KEY_FILE="aws-management-dev-key-1752952595_test.pem"
 LOCAL_POSTGRES_PORT=5433
 LOCAL_REDIS_PORT=6380
 

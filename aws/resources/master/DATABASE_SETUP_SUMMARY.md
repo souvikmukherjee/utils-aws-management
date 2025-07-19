@@ -32,12 +32,12 @@
 The following environment variables have been added to `.env.local`:
 
 ```
-DATABASE_URL=postgresql://postgres:test_password_123@aws-management-dev-db-1752948739-test.c7y6uccm606w.ap-southeast-2.rds.amazonaws.com:5432/aws-management_dev
+DATABASE_URL=postgresql://postgres:[PASSWORD]@aws-management-dev-db-1752948739-test.c7y6uccm606w.ap-southeast-2.rds.amazonaws.com:5432/aws-management_dev
 DB_HOST=aws-management-dev-db-1752948739-test.c7y6uccm606w.ap-southeast-2.rds.amazonaws.com
 DB_PORT=5432
 DB_NAME=aws-management_dev
 DB_USER=postgres
-DB_PASSWORD=test_password_123
+DB_PASSWORD=[PASSWORD]
 
 REDIS_URL=redis://aws-management-dev-redis-1752948739-test.zrxyak.0001.apse2.cache.amazonaws.com:6379
 REDIS_HOST=aws-management-dev-redis-1752948739-test.zrxyak.0001.apse2.cache.amazonaws.com

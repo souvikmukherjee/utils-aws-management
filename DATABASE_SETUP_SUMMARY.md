@@ -2,45 +2,45 @@
 
 ## Project: aws-management
 ## Environment: dev
-## Setup Date: Sun Jul 20 04:51:50 AEST 2025
+## Setup Date: Sun 20 Jul 2025 05:16:35 AEST
 
 ## AWS Resources Created
 
 ### PostgreSQL RDS
-- **Instance ID**: aws-management-dev-db-1752950390-test
-- **Endpoint**: aws-management-dev-db-1752950390-test.c7y6uccm606w.ap-southeast-2.rds.amazonaws.com
+- **Instance ID**: aws-management-dev-db-1752951966-test
+- **Endpoint**: aws-management-dev-db-1752951966-test.c7y6uccm606w.ap-southeast-2.rds.amazonaws.com
 - **Port**: 5432
 - **Database**: aws-management_dev
 - **Username**: postgres
 - **Instance Type**: db.t3.micro
-- **Security Group**: sg-0d3e4cf78c2f753fc
+- **Security Group**: sg-016af00aea8b13582
 
 ### Redis ElastiCache
-- **Cluster ID**: aws-management-dev-redis-1752950390-test
-- **Endpoint**: aws-management-dev-redis-1752950390-test.zrxyak.0001.apse2.cache.amazonaws.com
+- **Cluster ID**: aws-management-dev-redis-1752951966-test
+- **Endpoint**: aws-management-dev-redis-1752951966-test.zrxyak.0001.apse2.cache.amazonaws.com
 - **Port**: 6379
 - **Node Type**: cache.t3.micro
-- **Security Group**: sg-092b08d6e1b309424
+- **Security Group**: sg-0fd5dfe9d69c93d37
 
 ### Networking
 - **VPC**: vpc-0fa493c68b834d38c
-- **DB Subnet Group**: aws-management-dev-subnet-group-1752950390-test
-- **Redis Subnet Group**: aws-management-dev-redis-subnet-1752950390-test
+- **DB Subnet Group**: aws-management-dev-subnet-group-1752951966-test
+- **Redis Subnet Group**: aws-management-dev-redis-subnet-1752951966-test
 
 ## Environment Variables
 
 The following environment variables have been added to `.env.local`:
 
 ```
-DATABASE_URL=postgresql://postgres:test_password_123@aws-management-dev-db-1752950390-test.c7y6uccm606w.ap-southeast-2.rds.amazonaws.com:5432/aws-management_dev
-DB_HOST=aws-management-dev-db-1752950390-test.c7y6uccm606w.ap-southeast-2.rds.amazonaws.com
+DATABASE_URL=postgresql://postgres:[PASSWORD]@aws-management-dev-db-1752951966-test.c7y6uccm606w.ap-southeast-2.rds.amazonaws.com:5432/aws-management_dev
+DB_HOST=aws-management-dev-db-1752951966-test.c7y6uccm606w.ap-southeast-2.rds.amazonaws.com
 DB_PORT=5432
 DB_NAME=aws-management_dev
 DB_USER=postgres
-DB_PASSWORD=test_password_123
+DB_PASSWORD=[PASSWORD]
 
-REDIS_URL=redis://aws-management-dev-redis-1752950390-test.zrxyak.0001.apse2.cache.amazonaws.com:6379
-REDIS_HOST=aws-management-dev-redis-1752950390-test.zrxyak.0001.apse2.cache.amazonaws.com
+REDIS_URL=redis://aws-management-dev-redis-1752951966-test.zrxyak.0001.apse2.cache.amazonaws.com:6379
+REDIS_HOST=aws-management-dev-redis-1752951966-test.zrxyak.0001.apse2.cache.amazonaws.com
 REDIS_PORT=6379
 ```
 

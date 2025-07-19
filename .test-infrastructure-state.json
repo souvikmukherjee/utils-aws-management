@@ -1,0 +1,74 @@
+{
+  "test_started": "2025-07-19T19:06:00Z",
+  "resources_created": [
+    {
+      "type": "EC2_INSTANCE",
+      "id": "i-0d14aa250ef482e3f",
+      "name": "Jump Box Instance",
+      "created_at": "2025-07-19T19:18:01Z"
+    },
+    {
+      "type": "EC2_INSTANCE",
+      "id": "i-0abad44e4584ee1b8",
+      "name": "Jump Box Instance",
+      "created_at": "2025-07-19T19:18:01Z"
+    },
+    {
+      "type": "SECURITY_GROUP",
+      "id": "sg-016af00aea8b13582",
+      "name": "Security Group",
+      "created_at": "2025-07-19T19:18:01Z"
+    },
+    {
+      "type": "SECURITY_GROUP",
+      "id": "sg-0fd5dfe9d69c93d37",
+      "name": "Security Group",
+      "created_at": "2025-07-19T19:18:01Z"
+    },
+    {
+      "type": "SECURITY_GROUP",
+      "id": "sg-05b931c3a23f4d026",
+      "name": "Security Group",
+      "created_at": "2025-07-19T19:18:01Z"
+    },
+    {
+      "type": "SECURITY_GROUP",
+      "id": "sg-08b0594cd09923e85",
+      "name": "Security Group",
+      "created_at": "2025-07-19T19:18:01Z"
+    },
+    {
+      "type": "SECURITY_GROUP",
+      "id": "sg-069637656d710b1b8",
+      "name": "Security Group",
+      "created_at": "2025-07-19T19:18:01Z"
+    },
+    {
+      "type": "SECURITY_GROUP",
+      "id": "sg-069637656d710b1b8",
+      "name": "Security Group",
+      "created_at": "2025-07-19T19:18:01Z"
+    },
+    {
+      "type": "KEY_PAIR",
+      "id": "aws-management-dev-key-1752952595_test",
+      "name": "aws-management-dev-key-1752952595_test",
+      "created_at": "2025-07-19T19:18:01Z"
+    },
+    {
+      "type": "COGNITO_USER_POOL",
+      "id": "ap-southeast-2_efRLaPtCg",
+      "name": "User Pool",
+      "created_at": "2025-07-19T19:18:01Z"
+    },
+    {
+      "type": "COGNITO_USER_POOL",
+      "id": "ap-southeast-2_efRLaPtCg",
+      "name": "User Pool",
+      "created_at": "2025-07-19T19:18:01Z"
+    }
+  ],
+  "current_phase": "connectivity_tests",
+  "failed_phase": "connectivity_tests",
+  "cleanup_completed": false
+}
